@@ -459,9 +459,6 @@ public class BTree<K extends Comparable<K>, V> {
         List<String> testList = new LinkedList<>();
         StringBuilder builder = new StringBuilder();
         toString(root, builder, testList);
-        builder.append("\n");
-        builder.append("关键字数量：" + getSize() + "\n");
-        builder.append("树高：" + getHeight());
         return builder.toString();
     }
 
