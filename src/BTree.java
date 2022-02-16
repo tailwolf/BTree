@@ -30,7 +30,7 @@ public class BTree<K extends Comparable<K>, V> {
     /**
      * B树默认的最小度数
      */
-    private static final int DEFAULT_CAPACITY = 4;
+    private static final int DEFAULT_CAPACITY = 3;
 
     /**
      * B树的最小度数
@@ -40,8 +40,8 @@ public class BTree<K extends Comparable<K>, V> {
 
     /**
      * B树结点
-     * entries，保存了关键字和对应的值。
-     * childs，保存了该结点所拥有的子树
+     * entries，保存了关键字和对应的值。定义最多只能应该是2*d-1，这里创建时的大小是2*d，是为了防止分裂前数组下标越界
+     * childs，保存了该结点所拥有的子树。定义最多只能应该是2*d，这里创建时的大小是2*d+1，是为了防止分裂前数组下标越界
      * entryNum，结点中实际存在的关键字的个数
      */
     private class Node<K extends Comparable<K>, V> {
@@ -50,8 +50,8 @@ public class BTree<K extends Comparable<K>, V> {
         int entryNum;
 
         public Node(){
-            this.entries = new Entry[2*d-1];
-            this.childs = new Node[2*d];
+            this.entries = new Entry[2*d];
+            this.childs = new Node[2*d+1];
         }
 
         public Node(Entry<K, V> entry){
@@ -108,11 +108,11 @@ public class BTree<K extends Comparable<K>, V> {
 
     /**
      * b树的插入。
-     * 根据定义，b树关键字数量大小为d-1 <= entryNum <= 2d-1
+     * 根据定义，b树关键字数量大小为d-1 <= entryNum <= 2d-2
      * 当entryNum > 2d-1时，需要对结点进行分裂。分裂方法：
      * 从中间的位置(entryNum/2)将原结点的关键字分为两部分，右边的关键字在原结点中，左边的关键字放在新结点中，中间位置(entryNum/2)的结点插入到原结点的父结点。
      *
-     * 如果上述操作导致父结点的关键字也超出了上限，则对父结点进行分裂操作，直到父结点的关键字数量小于等于2d-1。
+     * 如果上述操作导致父结点的关键字也超出了上限，则对父结点进行分裂操作，直到父结点的关键字数量小于等于2d-2。
      * @param k 要插入的关键字
      * @param v 要插入的值
      */
@@ -148,7 +148,7 @@ public class BTree<K extends Comparable<K>, V> {
      * @param node  要分裂的结点
      */
     private Node<K, V> split(Node<K, V> node) {
-        if(node.entryNum < 2*d-1){
+        if(node.entryNum < 2*d){
             return null;
         }
 
@@ -157,8 +157,8 @@ public class BTree<K extends Comparable<K>, V> {
         Node<K, V> splitNode = new Node<>(middleEntry);
         splitNode.entryNum = 1;
 
-        Entry<K, V>[] leftEntries = new Entry[2*d-1];
-        Node<K, V>[] leftChilds = new Node[2*d];
+        Entry<K, V>[] leftEntries = new Entry[2*d];
+        Node<K, V>[] leftChilds = new Node[2*d+1];
         for(int i = 0; i < middle; i++){
             leftEntries[i] = node.entries[i];
             leftChilds[i] = node.childs[i];
